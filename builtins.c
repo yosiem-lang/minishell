@@ -9,6 +9,7 @@ static t_builtin	g_builtins[] = {
 	{"unset", ft_unset},
 	{"env", ft_env},
 	{"exit", ft_exit},
+	{"cat", ft_cat},
 	{NULL, NULL}
 };
 

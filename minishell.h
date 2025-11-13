@@ -85,6 +85,7 @@ int		print_export_list(t_env *env);
 int		ft_unset(char **args, t_env **env);
 int		ft_env(char **args, t_env **env);
 int		ft_exit(char **args, t_env **env);
+int		ft_cat(char **args, t_env **env);
 
 // 環境変数管理
 t_env	*init_env(char **envp);
@@ -100,7 +101,9 @@ char	**env_to_array(t_env *env);
 void	print_error(char *cmd, char *arg, char *error);
 int		is_valid_identifier(char *str);
 void	expand_variables(char **str, t_env *env);
+void	expand_variables_with_quotes(char **str, t_env *env);
 char	*get_expanded_string(char *str, t_env *env);
+char	*get_expanded_string_with_quotes(char *str, t_env *env);
 void	replace_variable(char **str, char *start, char *end, char *value);
 void	free_array(char **array);
 int		ft_strisdigit(char *str);
@@ -113,6 +116,7 @@ char	*find_executable(char *cmd, t_env *env);
 int		setup_redirections(char **tokens, int *in_fd, int *out_fd);
 int		open_input_file(char *filename);
 int		open_output_file(char *filename, int append);
+int		handle_heredoc(char *delimiter);
 void	restore_fds(int saved_stdin, int saved_stdout);
 
 // シグナル処理
@@ -136,6 +140,7 @@ bool	is_word(const char *s);
 t_token	*word(char **rest, char *line);
 void	append_char(char **s, char c);
 void	quote_removal(t_token *tok);
+void	expand_and_remove_quotes(t_token *tok, t_env *env);
 t_token	*tokenize(char *line);
 void	print_tokens(t_token *tok);
 void	free_token(t_token *tok);

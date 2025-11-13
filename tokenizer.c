@@ -175,6 +175,154 @@ void	append_char(char **s, char c)
 	*s = new;
 }
 
+// 文字列を結合して最初の文字列を解放
+static char	*strjoin_free(char *s1, char *s2)
+{
+	char	*result;
+
+	if (!s1 && !s2)
+		return (NULL);
+	if (!s1)
+		return (ft_strdup(s2));
+	if (!s2)
+		return (s1);
+	result = ft_strjoin(s1, s2);
+	free(s1);
+	return (result);
+}
+
+// クォート内で変数を展開（ダブルクォート内のみ、シングルクォート内は展開しない）
+static void	expand_in_quotes(char **result, char **p, t_env *env, char quote_char)
+{
+	char	*var_start;
+	char	*var_end;
+	char	*var_name;
+	char	*var_value;
+	int		len;
+	char	*expanded_part;
+
+	(*p)++; // クォート文字をスキップ
+	while (**p && **p != quote_char)
+	{
+		if (quote_char == DOUBLE_QUOTE_CHAR && **p == '$')
+		{
+			var_start = *p;
+			var_end = var_start + 1;
+			while (*var_end && (ft_isalnum(*var_end) || *var_end == '_'))
+				var_end++;
+			len = var_end - var_start - 1;
+			if (len > 0)
+			{
+				var_name = ft_substr(var_start + 1, 0, len);
+				if (var_name)
+				{
+					var_value = get_env_value(env, var_name);
+					if (var_value)
+						expanded_part = ft_strdup(var_value);
+					else
+						expanded_part = ft_strdup("");
+					if (expanded_part)
+					{
+						*result = strjoin_free(*result, expanded_part);
+						free(expanded_part);
+					}
+					free(var_name);
+					*p = var_end;
+					continue;
+				}
+			}
+			else if (*var_end == '?')
+			{
+				var_value = ft_itoa(g_signal);
+				if (var_value)
+				{
+					*result = strjoin_free(*result, var_value);
+					free(var_value);
+				}
+				*p = var_end + 1;
+				continue;
+			}
+		}
+		append_char(result, **p);
+		(*p)++;
+	}
+	if (**p == '\0')
+		fatal_error(quote_char == SINGLE_QUOTE_CHAR ? "Unclosed single quote" : "Unclosed double quote");
+	(*p)++; // 終了クォートをスキップ
+}
+
+// クォートを考慮した変数展開とクォート除去
+void	expand_and_remove_quotes(t_token *tok, t_env *env)
+{
+	while (tok && tok->kind != TK_EOF)
+	{
+		char	*new_word = NULL;
+		char	*p = tok->word;
+
+		while (*p)
+		{
+			if (*p == SINGLE_QUOTE_CHAR)
+			{
+				// シングルクォート内は展開しない
+				p++;
+				while (*p && *p != SINGLE_QUOTE_CHAR)
+					append_char(&new_word, *p++);
+				if (*p == '\0')
+					fatal_error("Unclosed single quote");
+				p++;
+			}
+			else if (*p == DOUBLE_QUOTE_CHAR)
+			{
+				// ダブルクォート内は$を展開
+				expand_in_quotes(&new_word, &p, env, DOUBLE_QUOTE_CHAR);
+			}
+			else if (*p == '$')
+			{
+				// クォート外の$も展開
+				char	*var_start = p;
+				char	*var_end = p + 1;
+				char	*var_name;
+				char	*var_value;
+				int		len;
+
+				while (*var_end && (ft_isalnum(*var_end) || *var_end == '_'))
+					var_end++;
+				len = var_end - var_start - 1;
+				if (len > 0)
+				{
+					var_name = ft_substr(var_start + 1, 0, len);
+					if (var_name)
+					{
+						var_value = get_env_value(env, var_name);
+						if (var_value)
+							new_word = strjoin_free(new_word, var_value);
+						free(var_name);
+					}
+					p = var_end;
+					continue;
+				}
+				else if (*var_end == '?')
+				{
+					var_value = ft_itoa(g_signal);
+					if (var_value)
+					{
+						new_word = strjoin_free(new_word, var_value);
+						free(var_value);
+					}
+					p = var_end + 1;
+					continue;
+				}
+				append_char(&new_word, *p++);
+			}
+			else
+				append_char(&new_word, *p++);
+		}
+		free(tok->word);
+		tok->word = new_word;
+		tok = tok->next;
+	}
+}
+
 void	quote_removal(t_token *tok)
 {
 	while (tok && tok->kind != TK_EOF)
@@ -237,7 +385,6 @@ t_token	*tokenize(char *line)
 			assert_error("Unexpected Token");
 	}
 	tok->next = new_token(NULL, TK_EOF);
-	quote_removal(head.next);
 	return (head.next);
 }
 

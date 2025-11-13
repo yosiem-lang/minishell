@@ -33,14 +33,17 @@ void	sigint_handler(int sig)
 }
 
 // SIGQUIT ハンドラー (Ctrl+\)
+// 対話モードでは何もしない
 void	sigquit_handler(int sig)
 {
 	(void)sig;
-	g_signal = 131;
-	ft_putstr_fd("Quit: ", STDOUT_FILENO);
-	ft_putnbr_fd(sig, STDOUT_FILENO);
-	ft_putchar_fd('\n', STDOUT_FILENO);
+	// 対話モードでは何もしない（bashの動作に合わせる）
 }
+
+
+
+
+
 
 
 

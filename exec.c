@@ -91,3 +91,8 @@ int	execute_external(char **argv, t_env **env)
 
 
 
+
+
+
+
+

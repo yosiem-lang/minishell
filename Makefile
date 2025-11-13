@@ -8,7 +8,7 @@ SRCDIR = .
 LIBFTDIR = ./libft
 
 # ソースファイル
-SRCS = main.c builtins.c echo.c pwd.c env.c exit.c cd.c export.c unset.c env_utils.c utils.c signals.c tokenizer.c exec.c redirect.c
+SRCS = main.c builtins.c echo.c pwd.c env.c exit.c cd.c export.c unset.c env_utils.c utils.c signals.c tokenizer.c exec.c redirect.c cat.c
 
 # オブジェクトファイル
 OBJS = $(SRCS:%.c=%.o)
