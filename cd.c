@@ -1,38 +1,10 @@
 #include "minishell.h"
 
-// cd コマンドの実装
-int	ft_cd(char **args, t_env **env)
+// 新しい関数: 環境変数の PWD と OLDPWD を更新する (引数3個)
+static int	update_pwd_env(t_env **env, char *old_pwd, char *path)
 {
-	char	*path;
-	char	*old_pwd;
 	char	*new_pwd;
 
-	if (!env || !*env)
-		return (1);
-	// 引数がない場合はHOMEディレクトリに移動
-	if (!args || !args[1])
-	{
-		path = get_env_value(*env, "HOME");
-		if (!path)
-		{
-			print_error("cd", NULL, "HOME not set");
-			return (1);
-		}
-	}
-	else
-		path = args[1];
-	// 現在のディレクトリを保存
-	old_pwd = getcwd(NULL, 0);
-	if (!old_pwd)
-		old_pwd = ft_strdup("");
-	// ディレクトリを変更
-	if (chdir(path) != 0)
-	{
-		print_error("cd", path, strerror(errno));
-		free(old_pwd);
-		return (1);
-	}
-	// 新しいディレクトリを取得
 	new_pwd = getcwd(NULL, 0);
 	if (!new_pwd)
 	{
@@ -40,7 +12,6 @@ int	ft_cd(char **args, t_env **env)
 		free(old_pwd);
 		return (1);
 	}
-	// PWDとOLDPWDを更新
 	update_env_value(*env, "OLDPWD", old_pwd);
 	update_env_value(*env, "PWD", new_pwd);
 	free(old_pwd);
@@ -48,10 +19,55 @@ int	ft_cd(char **args, t_env **env)
 	return (0);
 }
 
+// 新しい関数 1: 移動先のパスを決定する (引数2個)
+// 成功: パス文字列 (args[1] または HOMEの値) を返す
+// 失敗: NULL を返す (エラーメッセージはここで出力済み)
+static char	*get_cd_path(char **args, t_env *env_list)
+{
+	char	*path;
 
+	if (!args || !args[1])
+	{
+		path = get_env_value(env_list, "HOME");
+		if (!path)
+		{
+			print_error("cd", NULL, "HOME not set");
+			return (NULL);
+		}
+	}
+	else
+		path = args[1];
+	return (path);
+}
 
+// 新しい関数 2: ディレクトリ変更と環境変数更新を実行する (引数3個)
+static int	execute_cd(char *path, t_env **env)
+{
+	char	*old_pwd;
+	int		status;
 
+	old_pwd = getcwd(NULL, 0);
+	if (!old_pwd)
+		old_pwd = ft_strdup("");
+	if (chdir(path) != 0)
+	{
+		print_error("cd", path, strerror(errno));
+		free(old_pwd);
+		return (1);
+	}
+	status = update_pwd_env(env, old_pwd, path);
+	return (status);
+}
 
+// メイン関数 (制御とエラーチェック) (引数2個)
+int	ft_cd(char **args, t_env **env)
+{
+	char	*path;
 
-
-
+	if (!env || !*env)
+		return (1);
+	path = get_cd_path(args, *env);
+	if (!path)
+		return (1);
+	return (execute_cd(path, env));
+}

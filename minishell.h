@@ -69,6 +69,27 @@ typedef struct s_builtin
 	t_builtin_func	func;
 }	t_builtin;
 
+// オプションフラグの構造体
+typedef struct s_cat_options
+{
+	int	show_ends;		// -e, -E: 行末に$を表示
+	int	number_lines;	// -n: 行番号を表示
+	int	number_nonblank; // -b: 空行以外に行番号を表示
+	int	squeeze_blank;	// -s: 連続する空行を1行にまとめる
+}	t_cat_options;
+
+typedef struct s_process_state
+{
+	int	line_num;	// 行番号 (line_num)
+	int	is_newline; // 改行フラグ (is_newline)
+}	t_process_state;
+
+typedef struct s_env_pair
+{
+	char	*key;
+	char	*value;
+}	t_env_pair;
+
 // メイン関数
 int		minishell_loop(t_env **env);
 void	parse_and_execute(char *input, t_env **env);

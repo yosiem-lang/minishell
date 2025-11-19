@@ -1,16 +1,8 @@
 #include "minishell.h"
 
-// オプションフラグの構造体
-typedef struct s_cat_options
-{
-	int	show_ends;		// -e, -E: 行末に$を表示
-	int	number_lines;	// -n: 行番号を表示
-	int	number_nonblank; // -b: 空行以外に行番号を表示
-	int	squeeze_blank;	// -s: 連続する空行を1行にまとめる
-}	t_cat_options;
-
 // 文字を出力（オプションに応じて処理）
-static void	print_char_with_options(char c, t_cat_options *opts, int *line_num, int *is_newline)
+static void	print_char_with_options(char c,
+		t_cat_options *opts, int *line_num, int *is_newline)
 {
 	if (*is_newline)
 	{
@@ -33,15 +25,39 @@ static void	print_char_with_options(char c, t_cat_options *opts, int *line_num, 
 		ft_putchar_fd(c, STDOUT_FILENO);
 }
 
-// ファイルの内容を読み込んで標準出力に出力（オプション対応）
-static int	read_and_print_file(char *filename, t_cat_options *opts)
+static int	process_file_content(int fd, char *filename,
+		t_cat_options *opts, t_process_state *state)
 {
-	int		fd;
 	char	buffer[4096];
 	ssize_t	bytes_read;
-	int		line_num;
-	int		is_newline;
 	int		i;
+
+	while (1)
+	{
+		bytes_read = read(fd, buffer, sizeof(buffer));
+		if (bytes_read < 0)
+		{
+			print_error("cat", filename, strerror(errno));
+			return (1);
+		}
+		if (bytes_read == 0)
+			break ;
+		i = 0;
+		while (i < bytes_read)
+		{
+			print_char_with_options(buffer[i], opts,
+				&state->line_num, &state->is_newline);
+			i++;
+		}
+	}
+	return (0);
+}
+
+static int	read_and_print_file(char *filename, t_cat_options *opts)
+{
+	int				fd;
+	int				status;
+	t_process_state	state;
 
 	fd = open(filename, O_RDONLY);
 	if (fd < 0)
@@ -49,28 +65,11 @@ static int	read_and_print_file(char *filename, t_cat_options *opts)
 		print_error("cat", filename, strerror(errno));
 		return (1);
 	}
-	line_num = 1;
-	is_newline = 1;
-	while (1)
-	{
-		bytes_read = read(fd, buffer, sizeof(buffer));
-		if (bytes_read < 0)
-		{
-			print_error("cat", filename, strerror(errno));
-			close(fd);
-			return (1);
-		}
-		if (bytes_read == 0)
-			break;
-		i = 0;
-		while (i < bytes_read)
-		{
-			print_char_with_options(buffer[i], opts, &line_num, &is_newline);
-			i++;
-		}
-	}
+	state.line_num = 1;
+	state.is_newline = 1;
+	status = process_file_content(fd, filename, opts, &state);
 	close(fd);
-	return (0);
+	return (status);
 }
 
 // 標準入力から読み込んで標準出力に出力（オプション対応）
@@ -93,22 +92,41 @@ static int	read_from_stdin(t_cat_options *opts)
 			return (1);
 		}
 		if (bytes_read == 0)
-			break;
+			break ;
 		i = 0;
 		while (i < bytes_read)
-		{
-			print_char_with_options(buffer[i], opts, &line_num, &is_newline);
-			i++;
-		}
+			print_char_with_options(buffer[i++], opts, &line_num, &is_newline);
 	}
 	return (0);
 }
 
-// オプションを解析
+// 新しい関数: 単一のオプション文字列を解析する (引数2個)
+static int	set_options_from_arg(char *arg, t_cat_options *opts)
+{
+	int	j;
+
+	j = 1;
+	while (arg[j])
+	{
+		if (arg[j] == 'e' || arg[j] == 'E')
+			opts->show_ends = 1;
+		else if (arg[j] == 'n')
+			opts->number_lines = 1;
+		else if (arg[j] == 'b')
+			opts->number_nonblank = 1;
+		else if (arg[j] == 's')
+			opts->squeeze_blank = 1;
+		else
+			return (0);
+		j++;
+	}
+	return (1);
+}
+
+// 元の関数 (引数3個: args, opts, arg_start)
 static int	parse_options(char **args, t_cat_options *opts, int *arg_start)
 {
 	int	i;
-	int	j;
 
 	*opts = (t_cat_options){0, 0, 0, 0};
 	*arg_start = 1;
@@ -116,22 +134,9 @@ static int	parse_options(char **args, t_cat_options *opts, int *arg_start)
 	while (args[i] && args[i][0] == '-')
 	{
 		if (ft_strlen(args[i]) == 1)
-			break;
-		j = 1;
-		while (args[i][j])
-		{
-			if (args[i][j] == 'e' || args[i][j] == 'E')
-				opts->show_ends = 1;
-			else if (args[i][j] == 'n')
-				opts->number_lines = 1;
-			else if (args[i][j] == 'b')
-				opts->number_nonblank = 1;
-			else if (args[i][j] == 's')
-				opts->squeeze_blank = 1;
-			else
-				return (0);
-			j++;
-		}
+			break ;
+		if (set_options_from_arg(args[i], opts) == 0)
+			return (0);
 		i++;
 		(*arg_start)++;
 	}
@@ -151,16 +156,13 @@ int	ft_cat(char **args, t_env **env)
 	(void)env;
 	if (!args)
 		return (1);
-	// オプションを解析
 	if (!parse_options(args, &opts, &arg_start))
 	{
 		print_error("cat", args[1], "invalid option");
 		return (1);
 	}
-	// 引数がない場合は標準入力から読み込む
 	if (!args[arg_start])
 		return (read_from_stdin(&opts));
-	// 複数のファイルを処理
 	exit_status = 0;
 	i = arg_start;
 	while (args[i])
@@ -171,4 +173,3 @@ int	ft_cat(char **args, t_env **env)
 	}
 	return (exit_status);
 }
-

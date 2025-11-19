@@ -21,12 +21,3 @@ int	ft_env(char **args, t_env **env)
 	}
 	return (0);
 }
-
-
-
-
-
-
-
-
-

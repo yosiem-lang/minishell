@@ -1,14 +1,48 @@
 #include "minishell.h"
 
-// 環境変数リストを初期化
+// 新しい関数 1: 環境変数文字列からキーと値をパースする (引数1個)
+// 成功時はパース結果を含む構造体 (スタックに確保) を返す
+static t_env_pair	parse_env_string(char *env_str)
+{
+	t_env_pair	pair;
+	char		*equal_pos;
+
+	equal_pos = ft_strchr(env_str, '=');
+	if (equal_pos)
+	{
+		*equal_pos = '\0';
+		pair.key = env_str;
+		pair.value = equal_pos + 1;
+	}
+	else
+	{
+		pair.key = env_str;
+		pair.value = NULL;
+	}
+	return (pair);
+}
+
+// 新しい関数 2: パースされたキーと値でノードを作成し、リストに追加する (引数2個)
+static int	add_parsed_node(t_env **env_list, t_env_pair pair)
+{
+	t_env	*new_node;
+
+	new_node = create_env_node(pair.key, pair.value);
+	if (!new_node)
+	{
+		free_env_list(*env_list);
+		return (0);
+	}
+	add_env_node(env_list, pair.key, pair.value);
+	return (1);
+}
+
+// メイン関数 (引数1個: envp)
 t_env	*init_env(char **envp)
 {
-	t_env	*env;
-	t_env	*new_node;
-	char	*equal_pos;
-	char	*key;
-	char	*value;
-	int		i;
+	t_env		*env;
+	t_env_pair	pair;
+	int			i;
 
 	env = NULL;
 	if (!envp)
@@ -16,25 +50,9 @@ t_env	*init_env(char **envp)
 	i = 0;
 	while (envp[i])
 	{
-		equal_pos = ft_strchr(envp[i], '=');
-		if (equal_pos)
-		{
-			*equal_pos = '\0';
-			key = envp[i];
-			value = equal_pos + 1;
-		}
-		else
-		{
-			key = envp[i];
-			value = NULL;
-		}
-		new_node = create_env_node(key, value);
-		if (!new_node)
-		{
-			free_env_list(env);
+		pair = parse_env_string(envp[i]);
+		if (!add_parsed_node(&env, pair))
 			return (NULL);
-		}
-		add_env_node(&env, key, value);
 		i++;
 	}
 	return (env);
@@ -49,7 +67,10 @@ t_env	*create_env_node(char *key, char *value)
 	if (!node)
 		return (NULL);
 	node->key = ft_strdup(key);
-	node->value = value ? ft_strdup(value) : NULL;
+	if (value)
+		node->value = ft_strdup(value);
+	else
+		node->value = NULL;
 	node->next = NULL;
 	if (!node->key || (value && !node->value))
 	{
@@ -69,11 +90,11 @@ void	add_env_node(t_env **env, char *key, char *value)
 
 	new_node = create_env_node(key, value);
 	if (!new_node)
-		return;
+		return ;
 	if (!*env)
 	{
 		*env = new_node;
-		return;
+		return ;
 	}
 	current = *env;
 	while (current->next)
@@ -104,15 +125,18 @@ void	update_env_value(t_env *env, char *key, char *value)
 	t_env	*current;
 
 	if (!env || !key)
-		return;
+		return ;
 	current = env;
 	while (current)
 	{
 		if (ft_strncmp(current->key, key, ft_strlen(key) + 1) == 0)
 		{
 			free(current->value);
-			current->value = value ? ft_strdup(value) : NULL;
-			return;
+			if (value)
+				current->value = ft_strdup(value);
+			else
+				current->value = NULL;
+			return ;
 		}
 		current = current->next;
 	}
@@ -125,7 +149,7 @@ void	remove_env_node(t_env **env, char *key)
 	t_env	*prev;
 
 	if (!env || !*env || !key)
-		return;
+		return ;
 	current = *env;
 	prev = NULL;
 	while (current)
@@ -139,7 +163,7 @@ void	remove_env_node(t_env **env, char *key)
 			free(current->key);
 			free(current->value);
 			free(current);
-			return;
+			return ;
 		}
 		prev = current;
 		current = current->next;
@@ -163,13 +187,11 @@ void	free_env_list(t_env *env)
 	}
 }
 
-// 環境変数リストを配列に変換
-char	**env_to_array(t_env *env)
+// 新しい関数 1: 環境リストのノード数をカウントする (引数1個)
+static int	count_env_nodes(t_env *env)
 {
-	char	**array;
-	t_env	*current;
 	int		count;
-	int		i;
+	t_env	*current;
 
 	count = 0;
 	current = env;
@@ -178,31 +200,70 @@ char	**env_to_array(t_env *env)
 		count++;
 		current = current->next;
 	}
-	array = malloc(sizeof(char *) * (count + 1));
-	if (!array)
-		return (NULL);
+	return (count);
+}
+
+// 新しい関数 2: 単一のノードから KEY=VALUE 文字列を作成する (引数1個)
+// 失敗時には NULL を返す
+static char	*create_env_string(t_env *node)
+{
+	char	*str;
+	size_t	total_len;
+
+	if (!node->value)
+		str = ft_strdup(node->key);
+	else
+	{
+		total_len = ft_strlen(node->key) + ft_strlen(node->value) + 2;
+		str = malloc(total_len);
+		if (!str)
+			return (NULL);
+		ft_strlcpy(str, node->key, total_len);
+		ft_strlcat(str, "=", total_len);
+		ft_strlcat(str, node->value, total_len);
+	}
+	return (str);
+}
+
+// 新しい関数 1: 環境リストの内容を配列にコピーする (引数3個)
+// 成功時は1を返し、失敗時は0を返す (失敗時に配列を解放する)
+static int	convert_env_list_to_array(t_env *env, char **array, int count)
+{
+	t_env	*current;
+	int		i;
+	int		j;
+
 	i = 0;
 	current = env;
 	while (current)
 	{
-		if (current->value)
+		array[i] = create_env_string(current);
+		if (!array[i])
 		{
-			array[i] = malloc(ft_strlen(current->key) + ft_strlen(current->value) + 2);
-			if (!array[i])
-			{
-				free_array(array);
-				return (NULL);
-			}
-		ft_strlcpy(array[i], current->key, ft_strlen(current->key) + 1);
-		ft_strlcat(array[i], "=", ft_strlen(array[i]) + 2);
-		ft_strlcat(array[i], current->value, ft_strlen(array[i]) + ft_strlen(current->value) + 1);
+			j = 0;
+			while (j < i)
+				free(array[j++]);
+			free(array);
+			return (0);
 		}
-		else
-			array[i] = ft_strdup(current->key);
 		i++;
 		current = current->next;
 	}
-	array[i] = NULL;
-	return (array);
+	array[count] = NULL;
+	return (1);
 }
 
+// メイン関数 (引数1個: env)
+char	**env_to_array(t_env *env)
+{
+	char	**array;
+	int		count;
+
+	count = count_env_nodes(env);
+	array = malloc(sizeof(char *) * (count + 1));
+	if (!array)
+		return (NULL);
+	if (!convert_env_list_to_array(env, array, count))
+		return (NULL);
+	return (array);
+}
