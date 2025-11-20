@@ -17,12 +17,3 @@ int	ft_pwd(char **args, t_env **env)
 	free(cwd);
 	return (0);
 }
-
-
-
-
-
-
-
-
-

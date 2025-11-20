@@ -41,6 +41,33 @@ typedef struct s_token
 	struct s_token	*next;
 }	t_token;
 
+// tokensの走査範囲を定義する構造体
+typedef struct s_token_range
+{
+	int	start_idx;
+	int	end_idx;
+}	t_token_range;
+
+// t_fd_info 構造体 (内部に status を追加)
+typedef struct s_fd_info
+{
+	int	in_fd;
+	int	out_fd;
+	int	prev_pipe_read;
+	int	pipe_fd[2];
+	int	status; // 🚨 New field to hold exit status 🚨
+}	t_fd_info;
+
+/* **引数4個:** tokens, args, env, fd_ptr 
+(in_fd, out_fd, saved_stdin, saved_stdout)*/
+typedef struct s_fds
+{
+	int	in_fd;
+	int	out_fd;
+	int	saved_stdin;
+	int	saved_stdout;
+}	t_fds;
+
 // 環境変数管理用の構造体
 typedef struct s_env
 {

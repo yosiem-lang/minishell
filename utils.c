@@ -21,13 +21,11 @@ int	is_valid_identifier(char *str)
 
 	if (!str || !str[0])
 		return (0);
-	// 最初の文字は英字またはアンダースコア
 	if (!ft_isalpha(str[0]) && str[0] != '_')
 		return (0);
 	i = 1;
 	while (str[i])
 	{
-		// 英数字またはアンダースコア
 		if (!ft_isalnum(str[i]) && str[i] != '_')
 			return (0);
 		i++;
@@ -58,7 +56,7 @@ void	expand_variables(char **str, t_env *env)
 	char	*expanded;
 
 	if (!str || !*str || !env)
-		return;
+		return ;
 	expanded = get_expanded_string(*str, env);
 	if (expanded)
 	{
@@ -67,15 +65,71 @@ void	expand_variables(char **str, t_env *env)
 	}
 }
 
-// 展開された文字列を取得
+// **引数4個:** result_ptr, env, var_start, var_end
+static int	expand_regular_variable(char **result_ptr,
+		t_env *env, char *var_start, char *var_end)
+{
+	char	*var_name;
+	char	*var_value;
+	int		len;
+
+	len = var_end - var_start - 1;
+	if (len <= 0)
+		return (0);
+	var_name = ft_substr(var_start + 1, 0, len);
+	if (!var_name)
+		return (-1);
+	var_value = get_env_value(env, var_name);
+	if (var_value)
+		replace_variable(result_ptr, var_start, var_end, var_value);
+	else
+		replace_variable(result_ptr, var_start, var_end, "");
+	free(var_name);
+	return (1);
+}
+
+// **引数4個:** result_ptr, var_start, var_end, exit_status (g_signalの値)
+static int	expand_special_variable(char **result_ptr,
+		char *var_start, char *var_end, int exit_status)
+{
+	char	*var_value;
+
+	if (var_end[0] != '?')
+		return (0);
+	var_value = ft_itoa(exit_status);
+	if (!var_value)
+		return (-1);
+	replace_variable(result_ptr, var_start, var_end + 1, var_value);
+	free(var_value);
+	return (1);
+}
+
+// **引数4個:** result_ptr, env, var_start, g_signal
+// 戻り値: >0: 処理成功 (1)、0: 処理なし、-1: メモリ/関数エラー
+static int	process_next_variable(char **result_ptr,
+		t_env *env, char *var_start, int g_signal)
+{
+	char	*var_end;
+	int		ret;
+
+	var_end = var_start + 1;
+	while (var_end[0] && (ft_isalnum(var_end[0]) || var_end[0] == '_'))
+		var_end++;
+	ret = expand_regular_variable(result_ptr, env, var_start, var_end);
+	if (ret != 0)
+		return (ret);
+	ret = expand_special_variable(result_ptr, var_start, var_end, g_signal);
+	if (ret != 0)
+		return (ret);
+	return (0);
+}
+
+// **引数2個:** str, env
 char	*get_expanded_string(char *str, t_env *env)
 {
 	char	*result;
 	char	*var_start;
-	char	*var_end;
-	char	*var_name;
-	char	*var_value;
-	int		len;
+	int		ret;
 
 	if (!str || !env)
 		return (NULL);
@@ -85,40 +139,15 @@ char	*get_expanded_string(char *str, t_env *env)
 	var_start = ft_strchr(result, '$');
 	while (var_start)
 	{
-		var_end = var_start + 1;
-		while (var_end[0] && (ft_isalnum(var_end[0]) || var_end[0] == '_'))
-			var_end++;
-		len = var_end - var_start - 1;
-		if (len > 0)
+		ret = process_next_variable(&result, env, var_start, g_signal);
+		if (ret == -1)
+			return (free(result), NULL);
+		if (ret == 1)
 		{
-			var_name = ft_substr(var_start + 1, 0, len);
-			if (var_name)
-			{
-				var_value = get_env_value(env, var_name);
-				if (var_value)
-				{
-					// 変数を値に置換
-					replace_variable(&result, var_start, var_end, var_value);
-				}
-				else
-				{
-					// 変数が存在しない場合は空文字に置換
-					replace_variable(&result, var_start, var_end, "");
-				}
-				free(var_name);
-			}
+			var_start = ft_strchr(result, '$');
+			continue ;
 		}
-		else if (var_end[0] == '?')
-		{
-			// $? の処理
-			var_value = ft_itoa(g_signal);
-			if (var_value)
-			{
-				replace_variable(&result, var_start, var_end + 1, var_value);
-				free(var_value);
-			}
-		}
-		var_start = ft_strchr(result, '$');
+		var_start = ft_strchr(var_start + 1, '$');
 	}
 	return (result);
 }
@@ -131,12 +160,12 @@ void	replace_variable(char **str, char *start, char *end, char *value)
 	int		value_len;
 
 	if (!str || !*str || !start || !end || !value)
-		return;
+		return ;
 	len = ft_strlen(*str);
 	value_len = ft_strlen(value);
 	new_str = malloc(len - (end - start) + value_len + 1);
 	if (!new_str)
-		return;
+		return ;
 	ft_strlcpy(new_str, *str, start - *str + 1);
 	ft_strlcat(new_str, value, ft_strlen(new_str) + ft_strlen(value) + 1);
 	ft_strlcat(new_str, end, ft_strlen(new_str) + ft_strlen(end) + 1);
@@ -150,7 +179,7 @@ void	free_array(char **array)
 	int	i;
 
 	if (!array)
-		return;
+		return ;
 	i = 0;
 	while (array[i])
 	{

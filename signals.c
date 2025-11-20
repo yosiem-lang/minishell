@@ -9,12 +9,10 @@ void	setup_signal_handlers(void)
 	struct sigaction	sa_int;
 	struct sigaction	sa_quit;
 
-	// SIGINT (Ctrl+C) の処理
 	sa_int.sa_handler = sigint_handler;
 	sigemptyset(&sa_int.sa_mask);
 	sa_int.sa_flags = 0;
 	sigaction(SIGINT, &sa_int, NULL);
-	// SIGQUIT (Ctrl+\) の処理
 	sa_quit.sa_handler = sigquit_handler;
 	sigemptyset(&sa_quit.sa_mask);
 	sa_quit.sa_flags = 0;
@@ -37,18 +35,4 @@ void	sigint_handler(int sig)
 void	sigquit_handler(int sig)
 {
 	(void)sig;
-	// 対話モードでは何もしない（bashの動作に合わせる）
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
