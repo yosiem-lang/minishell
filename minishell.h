@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/22 04:54:23 by mkazuhik          #+#    #+#             */
+/*   Updated: 2025/11/22 05:48:54 by mkazuhik         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
@@ -18,7 +30,7 @@
 # include <limits.h>
 # include <stdbool.h>
 # include <ctype.h>
-# include "libft/libft.h"
+# include "libft.h"
 
 // グローバル変数（シグナル用）
 extern int	g_signal;
@@ -134,6 +146,13 @@ int		ft_unset(char **args, t_env **env);
 int		ft_env(char **args, t_env **env);
 int		ft_exit(char **args, t_env **env);
 int		ft_cat(char **args, t_env **env);
+int		read_and_print_file(char *filename, t_cat_options *opts);
+int		read_from_stdin(t_cat_options *opts);
+int		process_file_content(int fd, char *filename,
+			t_cat_options *opts, t_process_state *state);
+void	print_char_with_options(char c, t_cat_options *opts,
+			int *line_num, int *is_newline);
+int		parse_options(char **args, t_cat_options *opts, int *arg_start);
 
 // 環境変数管理
 t_env	*init_env(char **envp);
@@ -159,6 +178,8 @@ int		ft_strisdigit(char *str);
 // 外部コマンド実行
 int		execute_external(char **argv, t_env **env);
 char	*find_executable(char *cmd, t_env *env);
+char	*join_path(const char *dir, const char *cmd);
+char	*search_path_dirs(char **path_dirs, char *cmd);
 
 // リダイレクション処理
 int		setup_redirections(char **tokens, int *in_fd, int *out_fd);
@@ -189,8 +210,71 @@ t_token	*word(char **rest, char *line);
 void	append_char(char **s, char c);
 void	quote_removal(t_token *tok);
 void	expand_and_remove_quotes(t_token *tok, t_env *env);
+char	*strjoin_free(char *s1, char *s2);
+int		expand_variable_name(char **result, char **p, t_env *env,
+			char *var_end);
+int		expand_special_variable(char **result, char **p, int *exit_status_ptr,
+			char *var_end);
+int		handle_dollar_expansion(char **result, char **p, t_env *env,
+			int g_signal);
+void	expand_in_quotes(char **result, char **p, t_env *env, char quote_char);
+void	handle_single_quote(char **new_word, char **p);
+int		expand_regular_unquoted(char **new_word, char *var_start,
+			char *var_end, t_env *env);
+int		handle_special_unquoted(char **new_word, char **p_ptr,
+			char *var_end, int exit_status);
+int		handle_unquoted_var(char **new_word, char **p, t_env *env,
+			int exit_status);
+void	process_current_char(char **new_word, char **p);
+void	process_single_token(char **new_word, char **p, t_env *env,
+			int g_signal);
+int		handle_quoted_segment(char **p_ptr, char **new_word_ptr,
+			char quote_char);
+int		remove_quotes_from_word(char *word, char **new_word_ptr);
 t_token	*tokenize(char *line);
 void	print_tokens(t_token *tok);
 void	free_token(t_token *tok);
+
+/*-----------------------------------------------------------
+** Main.c function prototypes
+-----------------------------------------------------------*/
+
+char	**tokens_to_array(t_token *tok);
+int		fill_token_array(t_token *tok, char **array, int count);
+char	**extract_args(char **tokens);
+int		count_command_args(char **tokens);
+int		fill_command_args(char **tokens, char **args, int count);
+int		is_redirection(char *token);
+int		has_pipe(char **tokens);
+char	**get_pipe_command(char **tokens, int *start_idx);
+int		count_command_args_in_pipe(char **tokens, int start_i);
+int		fill_pipe_command_args(char **tokens,
+			char **args, int *start_idx_ptr, int count);
+int		handle_heredoc_redirection(char **tokens,
+			t_token_range range, int *in_fd, int *current_idx_ptr);
+int		handle_file_input_redirection(char **tokens,
+			t_token_range range, int *in_fd, int *current_idx_ptr);
+int		handle_input_redirections(char **tokens,
+			t_token_range range, int *in_fd, int *current_idx_ptr);
+int		handle_output_redirections(char **tokens,
+			t_token_range range, int *out_fd, int *current_idx_ptr);
+int		setup_pipe_redirections(char **tokens,
+			t_token_range range, int *in_fd, int *out_fd);
+void	find_pipe_segment(char **tokens,
+			int *start_idx_ptr, t_token_range *range_ptr, int *has_next_ptr);
+void	execute_child_process_pipe(char **args,
+			t_env **env, t_fd_info fd_info, int has_next);
+void	cleanup_parent_fds_and_pipe(t_fd_info *fdi_ptr, int has_next);
+pid_t	pipe_loop_segment(char **tokens,
+			t_env **env, t_fd_info *fdi_ptr, int *start_idx_ptr);
+int		execute_pipe(char **tokens, t_env **env);
+int		handle_tokenization_and_args(char *input,
+			t_env **env, char ***tokens_ptr, char ***args_ptr);
+int		handle_redirection_and_execution(char **tokens,
+			char **args, t_env **env, t_fds *fd_ptr);
+void	cleanup_and_exit_single(char **tokens,
+			char **args, int saved_stdin, int saved_stdout);
+void	execute_single_command(char **tokens,
+			char **args, t_env **env, t_fds *fds_ptr);
 
 #endif
