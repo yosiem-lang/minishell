@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 05:42:55 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:48:54 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/23 04:17:48 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,8 @@ void	find_pipe_segment(char **tokens,
 	*has_next_ptr = (tokens[end_idx] != NULL);
 }
 
-void	execute_child_process_pipe(char **args,
-		t_env **env, t_fd_info fd_info, int has_next)
+static void	setup_input_redirection(t_fd_info fd_info)
 {
-	child_signal_setting();
 	if (fd_info.in_fd >= 0)
 	{
 		dup2(fd_info.in_fd, STDIN_FILENO);
@@ -39,6 +37,10 @@ void	execute_child_process_pipe(char **args,
 		dup2(fd_info.prev_pipe_read, STDIN_FILENO);
 		close(fd_info.prev_pipe_read);
 	}
+}
+
+static void	setup_output_redirection(t_fd_info fd_info, int has_next)
+{
 	if (fd_info.out_fd >= 0)
 	{
 		dup2(fd_info.out_fd, STDOUT_FILENO);
@@ -50,6 +52,14 @@ void	execute_child_process_pipe(char **args,
 		close(fd_info.pipe_fd[0]);
 		close(fd_info.pipe_fd[1]);
 	}
+}
+
+void	execute_child_process_pipe(char **args,
+		t_env **env, t_fd_info fd_info, int has_next)
+{
+	child_signal_setting();
+	setup_input_redirection(fd_info);
+	setup_output_redirection(fd_info, has_next);
 	if (is_builtin(args[0]))
 		exit(execute_builtin(args, env));
 	else

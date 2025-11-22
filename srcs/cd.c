@@ -6,13 +6,12 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 04:58:44 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 23:05:25 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/23 04:17:48 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// 新しい関数: 環境変数の PWD と OLDPWD を更新する (引数3個)
 static int	update_pwd_env(t_env **env, char *old_pwd, char *path)
 {
 	char	*new_pwd;
@@ -24,12 +23,10 @@ static int	update_pwd_env(t_env **env, char *old_pwd, char *path)
 		free(old_pwd);
 		return (1);
 	}
-	// OLDPWDを更新または追加
 	if (get_env_value(*env, "OLDPWD") == NULL)
 		add_env_node(env, "OLDPWD", old_pwd);
 	else
 		update_env_value(*env, "OLDPWD", old_pwd);
-	// PWDを更新または追加
 	if (get_env_value(*env, "PWD") == NULL)
 		add_env_node(env, "PWD", new_pwd);
 	else
@@ -39,9 +36,6 @@ static int	update_pwd_env(t_env **env, char *old_pwd, char *path)
 	return (0);
 }
 
-// 新しい関数 1: 移動先のパスを決定する (引数2個)
-// 成功: パス文字列 (args[1] または HOMEの値) を返す
-// 失敗: NULL を返す (エラーメッセージはここで出力済み)
 static char	*get_cd_path(char **args, t_env *env_list)
 {
 	char	*path;
@@ -60,7 +54,6 @@ static char	*get_cd_path(char **args, t_env *env_list)
 	return (path);
 }
 
-// 新しい関数 2: ディレクトリ変更と環境変数更新を実行する (引数3個)
 static int	execute_cd(char *path, t_env **env)
 {
 	char	*old_pwd;
@@ -79,7 +72,6 @@ static int	execute_cd(char *path, t_env **env)
 	return (status);
 }
 
-// メイン関数 (制御とエラーチェック) (引数2個)
 int	ft_cd(char **args, t_env **env)
 {
 	char	*path;
