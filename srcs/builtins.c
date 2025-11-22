@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 04:58:34 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:02:08 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/23 04:03:49 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ static t_builtin	*get_builtins(void)
 	{"unset", ft_unset},
 	{"env", ft_env},
 	{"exit", ft_exit},
-	{"cat", ft_cat},
 	{NULL, NULL}
 	};
 

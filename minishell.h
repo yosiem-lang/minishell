@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 04:54:23 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:48:54 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/23 04:09:35 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,21 +108,6 @@ typedef struct s_builtin
 	t_builtin_func	func;
 }	t_builtin;
 
-// オプションフラグの構造体
-typedef struct s_cat_options
-{
-	int	show_ends;		// -e, -E: 行末に$を表示
-	int	number_lines;	// -n: 行番号を表示
-	int	number_nonblank; // -b: 空行以外に行番号を表示
-	int	squeeze_blank;	// -s: 連続する空行を1行にまとめる
-}	t_cat_options;
-
-typedef struct s_process_state
-{
-	int	line_num;	// 行番号 (line_num)
-	int	is_newline; // 改行フラグ (is_newline)
-}	t_process_state;
-
 typedef struct s_env_pair
 {
 	char	*key;
@@ -145,14 +130,6 @@ int		print_export_list(t_env *env);
 int		ft_unset(char **args, t_env **env);
 int		ft_env(char **args, t_env **env);
 int		ft_exit(char **args, t_env **env);
-int		ft_cat(char **args, t_env **env);
-int		read_and_print_file(char *filename, t_cat_options *opts);
-int		read_from_stdin(t_cat_options *opts);
-int		process_file_content(int fd, char *filename,
-			t_cat_options *opts, t_process_state *state);
-void	print_char_with_options(char c, t_cat_options *opts,
-			int *line_num, int *is_newline);
-int		parse_options(char **args, t_cat_options *opts, int *arg_start);
 
 // 環境変数管理
 t_env	*init_env(char **envp);
@@ -192,6 +169,7 @@ void	restore_fds(int saved_stdin, int saved_stdout);
 void	setup_signal_handlers(void);
 void	sigint_handler(int sig);
 void	sigquit_handler(int sig);
+void	child_signal_setting(void);
 
 /*-----------------------------------------------------------
 ** Tokenizer function prototypes

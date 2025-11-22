@@ -24,8 +24,16 @@ static int	update_pwd_env(t_env **env, char *old_pwd, char *path)
 		free(old_pwd);
 		return (1);
 	}
-	update_env_value(*env, "OLDPWD", old_pwd);
-	update_env_value(*env, "PWD", new_pwd);
+	// OLDPWDを更新または追加
+	if (get_env_value(*env, "OLDPWD") == NULL)
+		add_env_node(env, "OLDPWD", old_pwd);
+	else
+		update_env_value(*env, "OLDPWD", old_pwd);
+	// PWDを更新または追加
+	if (get_env_value(*env, "PWD") == NULL)
+		add_env_node(env, "PWD", new_pwd);
+	else
+		update_env_value(*env, "PWD", new_pwd);
 	free(old_pwd);
 	free(new_pwd);
 	return (0);

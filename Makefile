@@ -6,7 +6,7 @@
 #    By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/11/22 04:54:28 by mkazuhik          #+#    #+#              #
-#    Updated: 2025/11/22 05:48:54 by mkazuhik         ###   ########.fr        #
+#    Updated: 2025/11/23 03:37:18 by mkazuhik         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,10 +44,6 @@ SRCS = $(SRCDIR)/main.c \
 	$(SRCDIR)/redirect_file.c \
 	$(SRCDIR)/redirect_heredoc.c \
 	$(SRCDIR)/redirect_setup.c \
-	$(SRCDIR)/cat.c \
-	$(SRCDIR)/cat_print.c \
-	$(SRCDIR)/cat_read.c \
-	$(SRCDIR)/cat_options.c \
 	$(SRCDIR)/parse_args.c \
 	$(SRCDIR)/fill_args.c \
 	$(SRCDIR)/parse_pipe.c \

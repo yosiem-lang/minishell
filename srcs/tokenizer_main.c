@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 05:05:00 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 23:05:25 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/23 04:09:15 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,6 @@ t_token	*tokenize(char *line)
 	while (*line)
 	{
 		new_tail = tokenize_dispatcher(tok, &line, line);
-		if (new_tail == NULL && !is_blank(*line))
-			return (head.next);
 		if (new_tail != NULL)
 			tok = new_tail;
 	}

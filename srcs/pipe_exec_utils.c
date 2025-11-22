@@ -28,6 +28,7 @@ void	find_pipe_segment(char **tokens,
 void	execute_child_process_pipe(char **args,
 		t_env **env, t_fd_info fd_info, int has_next)
 {
+	child_signal_setting();
 	if (fd_info.in_fd >= 0)
 	{
 		dup2(fd_info.in_fd, STDIN_FILENO);

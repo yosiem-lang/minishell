@@ -48,3 +48,10 @@ void	sigquit_handler(int sig)
 {
 	(void)sig;
 }
+
+// 子プロセス用のシグナル設定（パイプ実行時）
+void	child_signal_setting(void)
+{
+	signal(SIGINT, SIG_DFL);
+	signal(SIGQUIT, SIG_DFL);
+}
