@@ -28,6 +28,22 @@ void	print_error(char *cmd, char *arg, char *error)
 	ft_putendl_fd(error, STDERR_FILENO);
 }
 
+void	print_system_error(char *cmd, char *arg)
+{
+	ft_putstr_fd("minishell: ", STDERR_FILENO);
+	if (cmd)
+	{
+		ft_putstr_fd(cmd, STDERR_FILENO);
+		ft_putstr_fd(": ", STDERR_FILENO);
+	}
+	if (arg)
+	{
+		ft_putstr_fd(arg, STDERR_FILENO);
+		ft_putstr_fd(": ", STDERR_FILENO);
+	}
+	ft_putendl_fd(strerror(errno), STDERR_FILENO);
+}
+
 int	is_valid_identifier(char *str)
 {
 	int	i;

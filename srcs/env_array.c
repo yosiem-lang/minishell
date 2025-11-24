@@ -2,11 +2,11 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   env_array.c                                        :+:      :+:    :+:   */
-/*                                                    ft +:+         +:+      */
+/*                                                    +:+ +:+         +:+     */
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 05:25:00 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:25:00 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/24 22:31:18 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,10 @@ static char	*create_env_string(t_env *node)
 		total_len = ft_strlen(node->key) + ft_strlen(node->value) + 2;
 		str = malloc(total_len);
 		if (!str)
+		{
+			print_error(NULL, NULL, "malloc failed");
 			return (NULL);
+		}
 		ft_strlcpy(str, node->key, total_len);
 		ft_strlcat(str, "=", total_len);
 		ft_strlcat(str, node->value, total_len);
@@ -81,7 +84,10 @@ char	**env_to_array(t_env *env)
 	count = count_env_nodes(env);
 	array = malloc(sizeof(char *) * (count + 1));
 	if (!array)
+	{
+		print_error(NULL, NULL, "malloc failed");
 		return (NULL);
+	}
 	if (!convert_env_list_to_array(env, array, count))
 		return (NULL);
 	return (array);

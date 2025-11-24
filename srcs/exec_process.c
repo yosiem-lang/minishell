@@ -2,11 +2,11 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   exec_process.c                                     :+:      :+:    :+:   */
-/*                                                    ft +:+         +:+      */
+/*                                                    +:+ +:+         +:+     */
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 05:25:00 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:25:00 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/25 03:33:23 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ int	execute_external(char **argv, t_env **env)
 	if (pid < 0)
 	{
 		free(exec_path);
-		print_error(argv[0], NULL, strerror(errno));
+		print_system_error(argv[0], NULL);
 		return (1);
 	}
 	if (pid == 0)

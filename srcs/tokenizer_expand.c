@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 05:05:00 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:05:00 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/25 03:32:21 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@ void	append_char(char **s, char c)
 
 	size = 2;
 	if (*s)
-		size += strlen(*s);
+		size += ft_strlen(*s);
 	new = malloc(size);
 	if (new == NULL)
 		fatal_error("malloc");
 	if (*s)
-		strlcpy(new, *s, size);
+		ft_strlcpy(new, *s, size);
 	new[size - 2] = c;
 	new[size - 1] = '\0';
 	if (*s)

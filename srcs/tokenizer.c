@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 03:59:24 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:07:52 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/25 03:34:12 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,15 @@
 
 void	fatal_error(const char *msg)
 {
-	dprintf(STDERR_FILENO, "Fatal Error: %s\n", msg);
+	ft_putstr_fd("Fatal Error: ", STDERR_FILENO);
+	ft_putendl_fd((char *)msg, STDERR_FILENO);
 	exit(1);
 }
 
 void	assert_error(const char *msg)
 {
-	dprintf(STDERR_FILENO, "Assert Error: %s\n", msg);
+	ft_putstr_fd("Assert Error: ", STDERR_FILENO);
+	ft_putendl_fd((char *)msg, STDERR_FILENO);
 	exit(255);
 }
 
@@ -36,9 +38,9 @@ t_token	*new_token(char *word, t_token_kind kind)
 {
 	t_token	*tok;
 
-	tok = calloc(1, sizeof(*tok));
+	tok = ft_calloc(1, sizeof(*tok));
 	if (tok == NULL)
-		fatal_error("calloc");
+		fatal_error("ft_calloc");
 	tok->word = word;
 	tok->kind = kind;
 	tok->next = NULL;

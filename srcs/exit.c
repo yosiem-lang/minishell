@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 04:54:44 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 04:54:45 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/23 21:11:47 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,11 @@ int	ft_exit(char **args, t_env **env)
 		exit_code = 0;
 	else
 	{
+		if (args[2])
+		{
+			print_error("exit", NULL, "too many arguments");
+			return (1);
+		}
 		if (!ft_strisdigit(args[1]))
 		{
 			print_error("exit", args[1], "numeric argument required");

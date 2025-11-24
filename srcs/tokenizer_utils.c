@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 05:05:00 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:07:52 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/25 04:13:30 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,18 @@
 
 bool	is_metacharacter(char c)
 {
-	return (c && strchr("|&;()<> \t\n", c));
+	return (c && ft_strchr("|&;()<> \t\n", c));
 }
 
 bool	startswith(const char *s, const char *keyword)
 {
-	return (memcmp(s, keyword, strlen(keyword)) == 0);
+	return (ft_memcmp(s, keyword, ft_strlen(keyword)) == 0);
 }
 
 bool	is_operator(const char *s)
 {
 	static char *const	operators[] = {
-		"||", "&", "&&", ";", ";;", "(", ")", "|", "\n", "<", ">", "<<", ">>"
+		"||", "&", "&&", ";", ";;", "(", ")", "|", "\n", "<<", "<", ">>", ">"
 	};
 	size_t				i;
 
@@ -42,7 +42,7 @@ bool	is_operator(const char *s)
 t_token	*operator(char **rest, char *line)
 {
 	static char *const	operators[] = {
-		"||", "&", "&&", ";", ";;", "(", ")", "|", "\n", "<", ">", "<<", ">>"
+		"||", "&", "&&", ";", ";;", "(", ")", "|", "\n", "<<", "<", ">>", ">"
 	};
 	size_t				i;
 	char				*op;
@@ -52,10 +52,10 @@ t_token	*operator(char **rest, char *line)
 	{
 		if (startswith(line, operators[i]))
 		{
-			op = strdup(operators[i]);
+			op = ft_strdup(operators[i]);
 			if (op == NULL)
-				fatal_error("strdup");
-			*rest = line + strlen(op);
+				fatal_error("ft_strdup");
+			*rest = line + ft_strlen(op);
 			return (new_token(op, TK_OP));
 		}
 		i++;

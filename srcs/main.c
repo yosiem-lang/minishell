@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 04:54:34 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:07:52 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/25 04:07:42 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,18 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 
+// readlineで入力を取得
+static char	*get_input_line(char *prompt)
+{
+	if (isatty(STDIN_FILENO))
+		return (readline(prompt));
+	else
+	{
+		rl_outstream = stderr;
+		return (readline(""));
+	}
+}
+
 // メインループ
 int	minishell_loop(t_env **env)
 {
@@ -39,12 +51,14 @@ int	minishell_loop(t_env **env)
 	char	*prompt;
 
 	prompt = "minishell$ ";
-	while (1)
+	while (true)
 	{
-		input = readline(prompt);
+		g_signal = 0;
+		input = get_input_line(prompt);
 		if (!input)
 		{
-			ft_putendl_fd("exit", STDOUT_FILENO);
+			if (isatty(STDIN_FILENO))
+				ft_putstr_fd("\nexit\n", STDERR_FILENO);
 			break ;
 		}
 		if (ft_strlen(input) > 0)

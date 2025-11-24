@@ -88,16 +88,6 @@ typedef struct s_env
 	struct s_env	*next;
 }	t_env;
 
-// コマンド解析用の構造体
-typedef struct s_cmd
-{
-	char			**args;
-	char			*input_file;
-	char			*output_file;
-	int				append_mode;
-	struct s_cmd	*next;
-}	t_cmd;
-
 // ビルトインコマンドの関数ポインタ型
 typedef int	(*t_builtin_func)(char **args, t_env **env);
 
@@ -117,7 +107,6 @@ typedef struct s_env_pair
 // メイン関数
 int		minishell_loop(t_env **env);
 void	parse_and_execute(char *input, t_env **env);
-int		execute_command(t_cmd *cmd, t_env **env);
 int		is_builtin(char *cmd);
 int		execute_builtin(char **args, t_env **env);
 
@@ -143,12 +132,9 @@ char	**env_to_array(t_env *env);
 
 // ユーティリティ関数
 void	print_error(char *cmd, char *arg, char *error);
+void	print_system_error(char *cmd, char *arg);
 int		is_valid_identifier(char *str);
-void	expand_variables(char **str, t_env *env);
-void	expand_variables_with_quotes(char **str, t_env *env);
-char	*get_expanded_string(char *str, t_env *env);
-char	*get_expanded_string_with_quotes(char *str, t_env *env);
-void	replace_variable(char **str, char *start, char *end, char *value);
+int		replace_variable(char **str, char *start, char *end, char *value);
 void	free_array(char **array);
 int		ft_strisdigit(char *str);
 
@@ -168,7 +154,6 @@ void	restore_fds(int saved_stdin, int saved_stdout);
 // シグナル処理
 void	setup_signal_handlers(void);
 void	sigint_handler(int sig);
-void	sigquit_handler(int sig);
 void	child_signal_setting(void);
 
 /*-----------------------------------------------------------

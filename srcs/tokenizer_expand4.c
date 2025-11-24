@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 05:43:36 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 05:48:54 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/24 23:36:40 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@ int	expand_regular_unquoted(char **new_word,
 	var_value = get_env_value(env, var_name);
 	if (var_value)
 		*new_word = strjoin_free(*new_word, var_value);
+	else
+		*new_word = strjoin_free(*new_word, "");
 	free(var_name);
 	return (1);
 }

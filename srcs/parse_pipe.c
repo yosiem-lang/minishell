@@ -39,7 +39,10 @@ char	**get_pipe_command(char **tokens, int *start_idx)
 		return (NULL);
 	args = malloc(sizeof(char *) * (count + 1));
 	if (!args)
+	{
+		print_error(NULL, NULL, "malloc failed");
 		return (NULL);
+	}
 	if (fill_pipe_command_args(tokens, args, start_idx, count) != 0)
 	{
 		free(args);

@@ -6,7 +6,7 @@
 /*   By: mkazuhik <mkazuhik@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 05:05:00 by mkazuhik          #+#    #+#             */
-/*   Updated: 2025/11/22 23:05:25 by mkazuhik         ###   ########.fr       */
+/*   Updated: 2025/11/25 03:30:14 by mkazuhik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,9 @@ t_token	*word(char **rest, char *line)
 	char		*word_str;
 
 	end = scan_word_end(line);
-	word_str = strndup(start, end - start);
+	word_str = ft_substr(start, 0, end - start);
 	if (word_str == NULL)
-		fatal_error("strndup");
+		fatal_error("ft_substr");
 	*rest = end;
 	return (new_token(word_str, TK_WORD));
 }

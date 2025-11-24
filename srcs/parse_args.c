@@ -29,7 +29,10 @@ char	**tokens_to_array(t_token *tok)
 		return (NULL);
 	array = malloc(sizeof(char *) * (count + 1));
 	if (!array)
+	{
+		print_error(NULL, NULL, "malloc failed");
 		return (NULL);
+	}
 	if (fill_token_array(tok, array, count) != 0)
 	{
 		free(array);
@@ -77,7 +80,10 @@ char	**extract_args(char **tokens)
 		return (NULL);
 	args = malloc(sizeof(char *) * (count + 1));
 	if (!args)
+	{
+		print_error(NULL, NULL, "malloc failed");
 		return (NULL);
+	}
 	if (fill_command_args(tokens, args, count) != 0)
 	{
 		free(args);

@@ -42,7 +42,14 @@ static int	add_parsed_node(t_env **env_list, t_env_pair pair)
 		free_env_list(*env_list);
 		return (0);
 	}
-	add_env_node(env_list, pair.key, pair.value);
+	if (!*env_list)
+	{
+		*env_list = new_node;
+		return (1);
+	}
+	while ((*env_list)->next)
+		env_list = &(*env_list)->next;
+	(*env_list)->next = new_node;
 	return (1);
 }
 
@@ -72,7 +79,10 @@ t_env	*create_env_node(char *key, char *value)
 
 	node = malloc(sizeof(t_env));
 	if (!node)
+	{
+		print_error(NULL, NULL, "malloc failed");
 		return (NULL);
+	}
 	node->key = ft_strdup(key);
 	if (value)
 		node->value = ft_strdup(value);
