@@ -133,3 +133,130 @@ Minishellの動作を検証するための具体的なコマンド例です。
     ```
     minishell>
     ```
+
+ご満足いただけて光栄です！✨
+
+承知いたしました。先ほどの評価シートに記載されていた機能検証のためのコマンドだけを抽出・整理し、**Minishellのテストケース**として一覧にまとめます。
+
+---
+
+# 📝 Minishell 実行テストケースコマンド集
+
+以下のコマンドは、Minishellの各機能を検証するために、**Minishellのプロンプト**で実行することを想定しています。
+
+## 1. 🛠️ コンパイルと基本動作
+
+| テスト目的 | コマンド（Shellで実行） |
+| :--- | :--- |
+| ビルドフラグ確認 | `make -n` |
+| コンパイルとエラー確認 | `make` |
+| 再リンクの禁止確認 | `make` を連続で2回実行 |
+| **起動** | `./minishell` (Minishellプロンプトへ) |
+
+---
+
+## 2. 🚀 シンプルコマンドと引数
+
+| テスト目的 | コマンド（Minishellで実行） |
+| :--- | :--- |
+| 絶対パス実行 | `/bin/ls` |
+| 空のコマンド | （Enterキーのみ） |
+| スペース・タブのみ | `     ` |
+| 絶対パスと引数 | `/bin/echo hello world` |
+| 引数とオプション | `ls -l` |
+| 複数コマンドと引数 | `grep minish main.c Makefile` |
+
+---
+
+## 3. 💰 プロセス終了ステータス
+
+| テスト目的 | コマンド（Minishellで実行） |
+| :--- | :--- |
+| 成功後のステータス | `/bin/ls` |
+| 成功後のステータス確認 | `echo $?` |
+| 失敗後のステータス | `/bin/ls filethatdoesntexist` |
+| 失敗後のステータス確認 | `echo $?` |
+| 算術演算 (任意) | `expr $? + $?` |
+
+---
+
+## 4. 🔗 引用符と環境変数
+
+| テスト目的 | コマンド（Minishellで実行） |
+| :--- | :--- |
+| ダブルクォートとスペース | `echo "hello world"` |
+| ダブルクォート内リテラル | `echo "cat lol.c | cat > lol.c"` |
+| シングルクォート内のリテラル | `echo '$USER'` |
+| シングルクォート内の空引数 | `echo ''` |
+| 環境変数展開 (非引用符) | `echo $USER` |
+| 環境変数展開 (ダブルクォート) | `echo "$USER"` |
+
+---
+
+## 5. 🐚 ビルトインコマンド
+
+| テスト目的 | コマンド（Minishellで実行） |
+| :--- | :--- |
+| `echo` 基本 | `echo hello` |
+| `echo` -n オプション | `echo -n hello` |
+| `exit` 基本 | `exit` |
+| `exit` 引数あり | `exit 42` |
+| `env` | `env` |
+| `export` 新規 | `export TEST_VAR=42` |
+| `export` 確認 | `env` |
+| `unset` 削除 | `unset TEST_VAR` |
+| `unset` 確認 | `env` |
+| `cd` 親ディレクトリ | `cd ..` |
+| `cd` カレントディレクトリ | `cd .` |
+| `cd` 失敗ケース | `cd /non/existent/path` |
+| `pwd` | `pwd` |
+
+---
+
+## 6. ⚙️ パスとリダイレクション
+
+| テスト目的 | コマンド（Minishellで実行） |
+| :--- | :--- |
+| 相対パス実行 | `./a.out` (実行ファイルがある場合) |
+| 複雑な相対パス | `cd /usr/bin; ../../bin/ls` |
+| $PATH経由の実行 | `ls` |
+| $PATH unset | `unset PATH` |
+| $PATH unset後の実行 | `ls` |
+| $PATH multi-set | `export PATH=/bin:/usr/bin` |
+| 標準出力リダイレクト | `echo test > out.txt` |
+| 標準入力リダイレクト | `cat < out.txt` |
+| 追記リダイレクト | `echo append >> out.txt` |
+| 複数リダイレクト | `cat < out.txt > final.txt` |
+| ヒアドキュメント | `grep test << END` |
+| リダイレクト失敗ケース | `cat < /dev/null > /etc/shadow` (書き込み権限エラーを誘発) |
+
+---
+
+## 7. 🔀 パイプ
+
+| テスト目的 | コマンド（Minishellで実行） |
+| :--- | :--- |
+| 単純なパイプ | `cat /etc/hosts | grep local` |
+| 複数パイプ | `cat file | grep bla | more` |
+| 失敗コマンドを含むパイプ | `ls filethatdoesntexist | grep bla | more` |
+| パイプとリダイレクト | `ls -l | grep minish > pipe_out.txt` |
+| 変則的なパイプ | `cat | cat | ls` |
+
+---
+
+## 8. 🛑 シグナルと歴史機能
+
+以下のテストは、特定のキー操作を要求します。
+
+| テスト目的 | コマンド（Minishellで実行） |
+| :--- | :--- |
+| **Ctrl-C** (空のプロンプト) | (何も入力せず) **Ctrl-C** |
+| **Ctrl-\** (空のプロンプト) | (何も入力せず) **Ctrl-\** |
+| **Ctrl-D** (空のプロンプト) | (何も入力せず) **Ctrl-D** |
+| **Ctrl-C** (入力途中) | `echo hello` と入力し **Ctrl-C** |
+| **Ctrl-C** (実行中) | `cat` を実行中に **Ctrl-C** |
+| **Ctrl-\** (実行中) | `cat` を実行中に **Ctrl-\** |
+| **ヒストリ確認** | `ls`, `pwd` などを実行後、**上矢印** / **下矢印** |
+| **バッファクリア確認** | `echo test` と入力後、**Ctrl-C**、その後 **Enter** |
+| **クラッシュ回避** | `dsbksdgbksdghsd` |
+    
